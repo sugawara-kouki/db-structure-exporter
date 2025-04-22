@@ -1,5 +1,10 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## これは何
+このプロジェクトは、DBの接続情報を入力して、カラムの定義をエクセルで出力するアプリです。
+QAなどの実装者ではない方々にサンプルデータを設定してもらうためのフォーマットとして使用したり、テーブル定義を逆引きしたりするために使用します。
+後は、なんかいい感じに追加実装していく予定ではあります。
+
 ## 使い方
 
 - パッケージ管理で、Bun を使用するので、インストールしておいてください✅️
