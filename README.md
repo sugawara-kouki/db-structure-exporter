@@ -1,5 +1,17 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## 使い方
+
+- パッケージ管理で、Bun を使用するので、インストールしておいてください✅️
+- `bun install`
+- `npm run dev`
+- `localhost:3000`にアクセスします
+- DB接続に必要な情報を入力します
+
+### 備考
+- 現時点では MySQL しかサポートしていないので、今後対応します (多分)
+
+
 ## Getting Started
 
 First, run the development server:
