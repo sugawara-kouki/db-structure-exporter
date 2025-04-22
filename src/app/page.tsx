@@ -32,21 +32,17 @@ export default function Home() {
   };
 
   // Excelエクスポート処理
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      // Excelファイルの生成
-      const excelBlob = ExcelService.generateExcelFile(structures);
-
-      // ダウンロード処理
-      const url = URL.createObjectURL(excelBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `database_structure_${new Date().toISOString().split('T')[0]}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Excelファイルのエクスポート
+      await ExcelService.exportToExcel(structures);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Excelファイルの生成に失敗しました');
+      setError(err instanceof Error ? err.message : 'Excelファイルのエクスポートに失敗しました');
+    } finally {
+      setLoading(false);
     }
   };
 

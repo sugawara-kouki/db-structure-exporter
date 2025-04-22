@@ -1,7 +1,7 @@
 // app/api/database/structure/route.ts
 import { NextResponse } from 'next/server';
 import mysql from 'mysql2/promise';
-import { DatabaseConnection, TableStructure } from '@/app/types/database';
+import type { DatabaseConnection, TableStructure } from '@/app/types/database';
 
 export async function POST(request: Request) {
   try {
@@ -49,6 +49,7 @@ async function getMySQLStructure(connection: DatabaseConnection): Promise<TableS
       FROM information_schema.tables
       WHERE table_schema = ?;
     `, [database]);
+    console.log(tables)
 
     const result: TableStructure[] = [];
 
