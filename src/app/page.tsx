@@ -31,7 +31,7 @@ export default function Home() {
     }
   };
 
-  // Excelエクスポート処理
+  // Excelエクスポート処理（既存機能）
   const handleExportExcel = async () => {
     setLoading(true);
     setError(null);
@@ -41,6 +41,21 @@ export default function Home() {
       await ExcelService.exportToExcel(structures);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Excelファイルのエクスポートに失敗しました');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // テストデータテンプレートエクスポート処理（新機能）
+  const handleExportTestTemplate = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // テストデータテンプレートのエクスポート
+      await ExcelService.exportTestDataTemplate(structures);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'テストデータテンプレートのエクスポートに失敗しました');
     } finally {
       setLoading(false);
     }
@@ -83,6 +98,7 @@ export default function Home() {
           <StructureDisplay
             structures={structures}
             onExportExcel={handleExportExcel}
+            onExportTestTemplate={handleExportTestTemplate}
           />
         )}
       </Box>

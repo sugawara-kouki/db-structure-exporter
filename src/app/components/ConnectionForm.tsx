@@ -71,8 +71,8 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ onSubmit, isLoading }) 
                   label="データベースタイプ"
                 >
                   <MenuItem value="mysql">MySQL</MenuItem>
-                  <MenuItem value="postgresql">PostgreSQL</MenuItem>
-                  <MenuItem value="mssql">SQL Server</MenuItem>
+                  <MenuItem value="postgresql" disabled={true}>【対応予定】PostgreSQL</MenuItem>
+                  <MenuItem value="mssql" disabled={true}>【対応予定】SQL Server</MenuItem>
                 </Select>
                 {touched.type && errors.type && (
                   <FormHelperText>{errors.type}</FormHelperText>
@@ -99,11 +99,23 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ onSubmit, isLoading }) 
                 id="port"
                 name="port"
                 label="ポート番号"
-                type="number"
+                type="text"
                 value={values.port}
-                onChange={handleChange}
+                onChange={(e) => {
+                  // 数字のみ許可する
+                  const value = e.target.value;
+                  if (value === "" || /^\d+$/.test(value)) {
+                    handleChange(e);  
+                  }
+                }}
                 error={touched.port && Boolean(errors.port)}
                 helperText={touched.port && errors.port}
+                // 数値のみを許可するヒントを追加
+                slotProps={{
+                  htmlInput: {
+                    inputMode: 'numeric'
+                  }
+                }}
               />
             </Box>
 

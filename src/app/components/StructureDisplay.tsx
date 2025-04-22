@@ -14,17 +14,26 @@ import {
   Typography,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  ButtonGroup,
+  Tooltip
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import TableRowsIcon from '@mui/icons-material/TableRows';
 import { TableStructure } from '../types/database';
 
 interface StructureDisplayProps {
   structures: TableStructure[];
   onExportExcel: () => void;
+  onExportTestTemplate: () => void; // 新しいテストデータテンプレート用エクスポート関数
 }
 
-const StructureDisplay: React.FC<StructureDisplayProps> = ({ structures, onExportExcel }) => {
+const StructureDisplay: React.FC<StructureDisplayProps> = ({ 
+  structures, 
+  onExportExcel,
+  onExportTestTemplate
+}) => {
   if (!structures.length) {
     return null;
   }
@@ -35,13 +44,29 @@ const StructureDisplay: React.FC<StructureDisplayProps> = ({ structures, onExpor
         <Typography variant="h5" component="h2">
           データベース構造
         </Typography>
-        <Button 
-          variant="contained" 
-          color="primary"
-          onClick={onExportExcel}
-        >
-          Excelにエクスポート
-        </Button>
+        
+        <Box sx={{display: 'flex', gap: 2}}>
+          <Tooltip title="テーブル構造をExcelにエクスポート">
+            <Button 
+              onClick={onExportExcel}
+              startIcon={<FileDownloadIcon />}
+              variant='contained'
+              color='primary'
+            >
+              構造をエクスポート
+            </Button>
+          </Tooltip>
+          <Tooltip title="テストデータ入力用のテンプレートをエクスポート">
+            <Button 
+              onClick={onExportTestTemplate}
+              startIcon={<TableRowsIcon />}
+              variant='contained'
+              color='primary'
+            >
+              テストデータテンプレート
+            </Button>
+          </Tooltip>
+        </Box>
       </Box>
 
       {structures.map((table) => (
