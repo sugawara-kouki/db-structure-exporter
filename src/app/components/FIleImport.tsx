@@ -16,6 +16,9 @@ interface FileImportProps {
   structures: TableStructure[];
   isLoading: boolean;
 }
+// onImportの型定義は親コンポーネントからdbTypeを渡さないように見えますが、
+// 実際の実装では親コンポーネント内にすでにdbTypeをクロージャとして
+// 利用できるため、propsに含める必要はないです
 
 const FileImport: React.FC<FileImportProps> = ({ 
   onImport, 

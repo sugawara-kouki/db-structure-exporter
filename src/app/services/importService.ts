@@ -13,7 +13,8 @@ export class ImportService {
    */
   static async importExcelAndGenerateSQL(
     file: File,
-    structures: TableStructure[]
+    structures: TableStructure[],
+    dbType: string // データベースタイプをFormDataに追加
   ): Promise<void> {
     try {
       // FormDataを作成
@@ -22,7 +23,8 @@ export class ImportService {
       
       // テーブル構造情報をJSON文字列に変換してFormDataに追加
       formData.append('structures', JSON.stringify(structures));
-      
+      formData.append('dbType', dbType)
+
       // APIを呼び出してSQLファイルを取得
       const response = await fetch('/api/database/generate-sql', {
         method: 'POST',

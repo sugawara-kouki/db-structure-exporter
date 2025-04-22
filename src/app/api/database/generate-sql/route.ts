@@ -12,6 +12,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const structuresJson = formData.get('structures') as string | null;
+    const dbType = formData.get("dbType") as string | null;
     
     // バリデーション
     if (!file) {
@@ -24,6 +25,13 @@ export async function POST(request: Request) {
     if (!structuresJson) {
       return NextResponse.json(
         { error: 'テーブル構造情報が提供されていません' },
+        { status: 400 }
+      );
+    }
+
+    if (!dbType) {
+      return NextResponse.json(
+        { error: 'データベースのタイプが提供されていません' },
         { status: 400 }
       );
     }
@@ -77,57 +85,12 @@ export async function POST(request: Request) {
       for (const row of data) {
         // 空の行はスキップ
         if (Object.keys(row).length === 0) continue;
-        
-        // 値が入力されているカラムのみ抽出
-        const nonEmptyColumns = Object.entries(row)
-          .filter(([_, value]) => value !== null && value !== undefined && value !== '')
-          .map(([key, _]) => key);
-        
-        if (nonEmptyColumns.length === 0) continue;
-        
+
         // SQLステートメントの作成
-        const columnNames = nonEmptyColumns.join(', ');
-        const values = nonEmptyColumns.map(column => {
-          const value = row[column];
-          
-          // カラムの型情報を取得
-          const columnDef = tableStructure.columns.find(c => c.name === column);
-          const isNumeric = columnDef && ['int', 'decimal', 'float', 'double', 'bigint', 'tinyint', 'smallint'].some(
-            type => columnDef.type.toLowerCase().includes(type)
-          );
-          const isBoolean = columnDef && ['boolean', 'tinyint(1)'].some(
-            type => columnDef.type.toLowerCase().includes(type)
-          );
-          
-          // データ型に応じて値をフォーマット
-          if (value === null || value === undefined) {
-            return 'NULL';
-          } else if (isBoolean) {
-            // Boolean型の処理
-            const boolValue = String(value).toLowerCase();
-            if (['true', 'yes', 'y', '1'].includes(boolValue)) {
-              return '1';
-            } else if (['false', 'no', 'n', '0'].includes(boolValue)) {
-              return '0';
-            } else {
-              return 'NULL';
-            }
-          } else if (isNumeric) {
-            // 数値型の処理
-            const numValue = String(value).replace(/,/g, ''); // カンマを除去
-            if (isNaN(Number(numValue))) {
-              return 'NULL';
-            }
-            return numValue;
-          } else {
-            // 文字列型の処理（エスケープ処理）
-            return `'${String(value).replace(/'/g, "''")}'`;
-          }
-        }).join(', ');
-        
-        // INSERTステートメントを作成
-        const insertStatement = `INSERT INTO ${tableName} (${columnNames}) VALUES (${values});`;
-        sqlStatements.push(insertStatement);
+        const sqlStatement = generateInsertStatement(tableName, row, tableStructure, dbType)
+        if (sqlStatement) {
+          sqlStatements.push(sqlStatement);
+        }
       }
       
       // テーブル間の区切り
@@ -168,3 +131,87 @@ export async function POST(request: Request) {
     );
   }
 }
+
+// SQLステートメントの作成部分を更新
+const generateInsertStatement = (tableName: string, row: Record<string, any>, tableStructure: TableStructure, dbType: string) => {
+  // 値が入力されているカラムのみ抽出
+  const nonEmptyColumns = Object.entries(row)
+    .filter(([_, value]) => value !== null && value !== undefined && value !== '')
+    .map(([key, _]) => key);
+  
+  if (nonEmptyColumns.length === 0) return null;
+  
+  // SQLステートメントの作成
+  const columnNames = nonEmptyColumns.join(', ');
+  
+  // データベースタイプに応じて値のフォーマット方法を調整
+  const formatValue = (column: string, value: any) => {
+    const columnDef = tableStructure.columns.find(c => c.name === column);
+    
+    if (value === null || value === undefined) {
+      return 'NULL';
+    }
+    
+    // データベースタイプに応じた条件判定
+    if (dbType === 'postgresql') {
+      // PostgreSQL向けの処理
+      const isNumeric = columnDef && ['integer', 'numeric', 'real', 'double precision', 'bigint', 'smallint'].some(
+        type => columnDef.type.toLowerCase().includes(type)
+      );
+      const isBoolean = columnDef && ['boolean'].some(
+        type => columnDef.type.toLowerCase().includes(type)
+      );
+      
+      if (isBoolean) {
+        const boolValue = String(value).toLowerCase();
+        if (['true', 'yes', 'y', '1'].includes(boolValue)) {
+          return 'TRUE';
+        } else if (['false', 'no', 'n', '0'].includes(boolValue)) {
+          return 'FALSE';
+        } else {
+          return 'NULL';
+        }
+      } else if (isNumeric) {
+        const numValue = String(value).replace(/,/g, '');
+        if (isNaN(Number(numValue))) {
+          return 'NULL';
+        }
+        return numValue;
+      } else {
+        return `'${String(value).replace(/'/g, "''")}'`;
+      }
+    } else {
+      // MySQL向けの処理 (既存のコード)
+      const isNumeric = columnDef && ['int', 'decimal', 'float', 'double', 'bigint', 'tinyint', 'smallint'].some(
+        type => columnDef.type.toLowerCase().includes(type)
+      );
+      const isBoolean = columnDef && ['boolean', 'tinyint(1)'].some(
+        type => columnDef.type.toLowerCase().includes(type)
+      );
+      
+      if (isBoolean) {
+        const boolValue = String(value).toLowerCase();
+        if (['true', 'yes', 'y', '1'].includes(boolValue)) {
+          return '1';
+        } else if (['false', 'no', 'n', '0'].includes(boolValue)) {
+          return '0';
+        } else {
+          return 'NULL';
+        }
+      } else if (isNumeric) {
+        const numValue = String(value).replace(/,/g, '');
+        if (isNaN(Number(numValue))) {
+          return 'NULL';
+        }
+        return numValue;
+      } else {
+        return `'${String(value).replace(/'/g, "''")}'`;
+      }
+    }
+  };
+  
+  const values = nonEmptyColumns.map(column => formatValue(column, row[column])).join(', ');
+  
+  // INSERTステートメントを作成
+  return `INSERT INTO ${tableName} (${columnNames}) VALUES (${values});`;
+};

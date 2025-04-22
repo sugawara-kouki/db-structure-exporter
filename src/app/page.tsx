@@ -16,12 +16,14 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null); // 成功メッセージ用の状態
+  const [dbType, setDbType] = useState<string>('mysql') // データベースタイプの状態
 
   // データベース接続処理
   const handleConnect = async (connection: DatabaseConnection) => {
     setLoading(true);
     setError(null);
     setSuccessMessage(null);
+    setDbType(connection.type)
 
     try {
       // データベース構造の取得
@@ -78,7 +80,7 @@ export default function Home() {
     
     try {
       // ファイルのインポートとSQL生成
-      await ImportService.importExcelAndGenerateSQL(file, tableStructures);
+      await ImportService.importExcelAndGenerateSQL(file, tableStructures, dbType);
       setSuccessMessage('SQLファイルの生成が完了しました');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'SQLファイルの生成に失敗しました');

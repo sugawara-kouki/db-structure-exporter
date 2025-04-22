@@ -71,7 +71,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ onSubmit, isLoading }) 
                   label="データベースタイプ"
                 >
                   <MenuItem value="mysql">MySQL</MenuItem>
-                  <MenuItem value="postgresql" disabled={true}>【対応予定】PostgreSQL</MenuItem>
+                  <MenuItem value="postgresql">PostgreSQL</MenuItem>
                   <MenuItem value="mssql" disabled={true}>【対応予定】SQL Server</MenuItem>
                 </Select>
                 {touched.type && errors.type && (
