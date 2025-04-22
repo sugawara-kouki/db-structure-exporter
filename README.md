@@ -11,7 +11,6 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 ### 備考
 - 現時点では MySQL しかサポートしていないので、今後対応します (多分)
 
-
 ## Getting Started
 
 First, run the development server:
